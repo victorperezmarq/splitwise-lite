@@ -8,10 +8,16 @@ type ExpenseWithAuthor = Expense & {
     id: string
     full_name: string
     avatar_url: string | null
-  }
+  } | null
 }
 
-export default function ExpenseList({ expenses }: { expenses: ExpenseWithAuthor[] }) {
+export default function ExpenseList({ 
+  expenses, 
+  currentUserId 
+}: { 
+  expenses: ExpenseWithAuthor[],
+  currentUserId?: string
+}) {
   if (expenses.length === 0) {
     return (
       <div className="text-center py-8 text-slate-400">
