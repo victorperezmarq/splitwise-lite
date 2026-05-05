@@ -1,46 +1,94 @@
 // src/app/(dashboard)/groups/[groupId]/page.tsx
-import { notFound, redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { Users, Copy, Receipt, TrendingUp } from 'lucide-react'
-import { CopyInviteButton } from '@/app/(dashboard)/groups/[groupId]/CopyInviteButton'
-import type { GroupWithMembers } from '@/types/database'
+'use client'
 
-export default async function GroupPage({
+import { useState } from 'react'
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Users, Copy, Receipt, TrendingUp, Plus } from 'lucide-react'
+import { useEffect } from 'react'
+import { CopyInviteButton } from './CopyInviteButton'
+import ExpenseModal from './expenses/new/ExpenseModal'
+import ExpenseList from './expenses/ExpenseList'
+import type { GroupMember, Profile, Expense } from '@/types/database'
+
+type Member = GroupMember & { profiles: Profile | null }
+type ExpenseWithAuthor = Expense & { profiles: Profile }
+
+export default function GroupPage({
     params,
 }: {
     params: Promise<{ groupId: string }>
 }) {
-    const { groupId } = await params
-    const supabase = await createClient()
+    const [groupId, setGroupId] = useState('')
+    const [group, setGroup] = useState<any>(null)
+    const [members, setMembers] = useState<Member[]>([])
+    const [expenses, setExpenses] = useState<ExpenseWithAuthor[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [currentUser, setCurrentUser] = useState<string>('')
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/login')
+    useEffect(() => {
+        const fetchData = async () => {
+            const p = await params
+            setGroupId(p.groupId)
 
-    // Obtener el grupo con todos sus miembros
-    const { data: group, error } = await supabase
-        .from('groups')
-        .select(`
-      *,
-      group_members (
-        id,
-        role,
-        user_id,
-        joined_at,
-        profiles ( id, full_name, avatar_url )
-      )
-    `)
-        .eq('id', groupId)
-        .single()
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
 
-    if (error || !group) notFound()
+            if (!user) return redirect('/login')
+            setCurrentUser(user.id)
 
-    const typedGroup = group as unknown as GroupWithMembers
+            // Obtener grupo con miembros
+            const { data: groupData } = await supabase
+                .from('groups')
+                .select(`
+          *,
+          group_members (
+            id,
+            role,
+            user_id,
+            joined_at,
+            profiles ( id, full_name, avatar_url )
+          )
+        `)
+                .eq('id', p.groupId)
+                .single()
 
-    // Verificar que el usuario es miembro del grupo
-    const isMember = typedGroup.group_members.some(m => m.user_id === user.id)
-    if (!isMember) redirect('/groups')
+            if (!groupData) {
+                notFound()
+            }
 
-    const isAdmin = typedGroup.group_members.find(m => m.user_id === user.id)?.role === 'admin'
+            // Verificar que es miembro
+            const isMember = groupData.group_members.some((m: any) => m.user_id === user.id)
+            if (!isMember) {
+                redirect('/groups')
+            }
+
+            setGroup(groupData)
+            setMembers(groupData.group_members)
+
+            // Obtener gastos
+            const { data: expensesData } = await supabase
+                .from('expenses')
+                .select(`
+          *,
+          profiles ( id, full_name, avatar_url )
+        `)
+                .eq('group_id', p.groupId)
+                .order('created_at', { ascending: false })
+
+            setExpenses(expensesData || [])
+            setIsLoading(false)
+        }
+
+        fetchData()
+    }, [params])
+
+    if (isLoading || !group) {
+        return <div className="animate-pulse py-8">Cargando...</div>
+    }
+
+    const isAdmin = members.find(m => m.user_id === currentUser)?.role === 'admin'
 
     return (
         <div className="space-y-6">
@@ -49,54 +97,79 @@ export default async function GroupPage({
             <div className="bg-white border border-slate-200 rounded-2xl p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{typedGroup.name}</h1>
-                        {typedGroup.description && (
-                            <p className="text-slate-500 text-sm mt-1">{typedGroup.description}</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{group.name}</h1>
+                        {group.description && (
+                            <p className="text-slate-500 text-sm mt-1">{group.description}</p>
                         )}
                     </div>
-                    {/* Código de invitación */}
                     <div className="text-right shrink-0">
                         <p className="text-xs text-slate-400 mb-1">Código de invitación</p>
                         <div className="flex items-center gap-2">
                             <code className="bg-slate-100 text-slate-800 font-mono text-sm px-3 py-1.5 rounded-lg tracking-widest">
-                                {typedGroup.invite_code}
+                                {group.invite_code}
                             </code>
-                            <CopyInviteButton code={typedGroup.invite_code} />
+                            <CopyInviteButton code={group.invite_code} />
                         </div>
                     </div>
                 </div>
 
-                {/* Stats rápidas */}
+                {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
                     <StatBox
                         icon={<Users className="w-4 h-4 text-blue-500" />}
-                        value={typedGroup.group_members.length}
+                        value={members.length}
                         label="Miembros"
                     />
                     <StatBox
                         icon={<Receipt className="w-4 h-4 text-green-500" />}
-                        value="—"
+                        value={expenses.length}
                         label="Gastos"
                     />
                     <StatBox
                         icon={<TrendingUp className="w-4 h-4 text-orange-500" />}
-                        value="—"
-                        label="Total gastado"
+                        value={expenses.length > 0 ? `€${expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}` : '€0'}
+                        label="Total"
                     />
                 </div>
+            </div>
+
+            {/* Botón crear gasto */}
+            <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            >
+                <Plus className="w-4 h-4" />
+                Registrar gasto
+            </button>
+
+            {/* Modal crear gasto */}
+            <ExpenseModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                groupId={groupId}
+                members={members}
+                currentUserId={currentUser}
+            />
+
+            {/* Lista de gastos */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+                <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <Receipt className="w-4 h-4" />
+                    Gastos ({expenses.length})
+                </h2>
+                <ExpenseList expenses={expenses} />
             </div>
 
             {/* Miembros del grupo */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6">
                 <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Miembros ({typedGroup.group_members.length})
+                    Miembros ({members.length})
                 </h2>
                 <div className="space-y-3">
-                    {typedGroup.group_members.map(member => (
+                    {members.map(member => (
                         <div key={member.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                {/* Avatar inicial */}
                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0">
                                     <span className="text-white text-sm font-medium">
                                         {member.profiles?.full_name?.[0]?.toUpperCase() ?? '?'}
@@ -105,13 +178,12 @@ export default async function GroupPage({
                                 <div>
                                     <p className="text-sm font-medium text-slate-900">
                                         {member.profiles?.full_name ?? 'Usuario'}
-                                        {member.user_id === user.id && (
+                                        {member.user_id === currentUser && (
                                             <span className="text-slate-400 font-normal ml-1">(tú)</span>
                                         )}
                                     </p>
                                 </div>
                             </div>
-                            {/* Badge de rol */}
                             {member.role === 'admin' && (
                                 <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                                     Admin
@@ -121,19 +193,10 @@ export default async function GroupPage({
                     ))}
                 </div>
             </div>
-
-            {/* Placeholder de gastos — Fase 5 */}
-            <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center">
-                <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-slate-500">Los gastos aparecerán aquí</p>
-                <p className="text-xs text-slate-400 mt-1">Fase 5 en construcción 🚧</p>
-            </div>
-
         </div>
     )
 }
 
-// ── Subcomponente: caja de stat ───────────────────────────────
 function StatBox({
     icon,
     value,
