@@ -1,11 +1,13 @@
 // src/app/(dashboard)/groups/[groupId]/page.tsx
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Users, Receipt, TrendingUp } from 'lucide-react'
+import { Users, Receipt, TrendingUp, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 import { CopyInviteButton } from './CopyInviteButton'
 import ExpenseList from './expenses/ExpenseList'
-import GroupActions from '@/app/(dashboard)/groups/[groupId]/GroupActions'
+import GroupActions from './GroupActions'
+import RealtimeProvider from './RealtimeProvider'
 import type { GroupMember, Profile, Expense } from '@/types/database'
 
 type Member = GroupMember & { profiles: Profile | null }
@@ -24,7 +26,6 @@ export default async function GroupPage({
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    // Grupo + miembros
     const { data: group } = await supabase
         .from('groups')
         .select(`
@@ -43,7 +44,6 @@ export default async function GroupPage({
     const isMember = members.some(m => m.user_id === user.id)
     if (!isMember) redirect('/groups')
 
-    // Gastos del grupo
     const { data: expenses } = await supabase
         .from('expenses')
         .select('*, profiles ( id, full_name, avatar_url )')
@@ -53,8 +53,20 @@ export default async function GroupPage({
     const expenseList = (expenses ?? []) as ExpenseWithAuthor[]
     const totalAmount = expenseList.reduce((sum, e) => sum + e.amount, 0)
 
+    // Mapa userId → nombre para Realtime
+    const memberNames = Object.fromEntries(
+        members.map(m => [m.user_id, m.profiles?.full_name ?? 'Usuario'])
+    )
+
     return (
         <div className="space-y-6">
+
+            {/* Realtime: invisible, solo gestiona WebSockets */}
+            <RealtimeProvider
+                groupId={groupId}
+                currentUserId={user.id}
+                memberNames={memberNames}
+            />
 
             {/* Header */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6">
@@ -96,7 +108,28 @@ export default async function GroupPage({
                 </div>
             </div>
 
-            {/* Botón crear gasto + modal — Client Component separado */}
+            {/* Enlace a deudas */}
+            <Link
+                href={`/groups/${groupId}/debts`}
+                className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-xl px-5 py-4 hover:bg-orange-100 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-slate-900 text-sm">
+                            Ver deudas y liquidar
+                        </p>
+                        <p className="text-xs text-slate-500">
+                            Plan óptimo de transferencias
+                        </p>
+                    </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400" />
+            </Link>
+
+            {/* Botón crear gasto */}
             <GroupActions
                 groupId={groupId}
                 members={members}
