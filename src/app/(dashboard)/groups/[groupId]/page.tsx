@@ -9,6 +9,8 @@ import ExpenseList from './expenses/ExpenseList'
 import GroupActions from './GroupActions'
 import RealtimeProvider from './RealtimeProvider'
 import type { GroupMember, Profile, Expense } from '@/types/database'
+import CategoryPieChart from '@/components/charts/CategoryPieChart'
+
 
 type Member = GroupMember & { profiles: Profile | null }
 type ExpenseWithAuthor = Expense & {
@@ -144,6 +146,17 @@ export default async function GroupPage({
                 </h2>
                 <ExpenseList expenses={expenseList} currentUserId={user.id} />
             </div>
+
+            {/* Gráfico de categorías */}
+            {expenseList.length > 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-6">
+                    <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                        <span>📊</span>
+                        Gastos por categoría
+                    </h2>
+                    <CategoryPieChart expenses={expenseList} />
+                </div>
+            )}
 
             {/* Miembros */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6">

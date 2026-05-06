@@ -63,6 +63,17 @@ export default async function GroupsPage() {
     .map(m => m.groups)
     .filter(Boolean) as unknown as GroupResult[]
 
+  // Obtener deudas pendientes del usuario (balance negativo = debe dinero)
+  const { data: pendingBalances } = await supabase
+    .from('group_balances')
+    .select('group_id, net_balance, user_id')
+    .eq('user_id', user.id)
+    .lt('net_balance', -0.01)
+
+  const groupsWithDebt = new Set(
+    (pendingBalances ?? []).map(b => b.group_id)
+  )
+
   return (
     <div className="space-y-6">
 
@@ -89,7 +100,12 @@ export default async function GroupsPage() {
       {myGroups.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {myGroups.map(group => (
-            <GroupCard key={group.id} group={group} currentUserId={user.id} />
+            <GroupCard
+              key={group.id}
+              group={group}
+              currentUserId={user.id}
+              hasDebt={groupsWithDebt.has(group.id)}
+            />
           ))}
         </div>
       ) : (
@@ -113,9 +129,11 @@ export default async function GroupsPage() {
 function GroupCard({
   group,
   currentUserId,
+  hasDebt,
 }: {
   group: GroupResult
   currentUserId: string
+  hasDebt: boolean
 }) {
   const isAdmin =
     group.group_members.find(m => m.user_id === currentUserId)?.role === 'admin'
@@ -133,6 +151,11 @@ function GroupCard({
         {isAdmin && (
           <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium shrink-0">
             Admin
+          </span>
+        )}
+        {hasDebt && (
+          <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">
+            Deuda
           </span>
         )}
       </div>
