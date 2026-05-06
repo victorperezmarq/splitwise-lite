@@ -1,7 +1,7 @@
 // src/app/(dashboard)/groups/[groupId]/page.tsx
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Users, Receipt, TrendingUp, ArrowRight } from 'lucide-react'
+import { Users, Receipt, TrendingUp, ArrowRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 import { CopyInviteButton } from './CopyInviteButton'
@@ -125,6 +125,25 @@ export default async function GroupPage({
                         </p>
                         <p className="text-xs text-slate-500">
                             Plan óptimo de transferencias
+                        </p>
+                    </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400" />
+            </Link>
+            <Link
+                href={`/groups/${groupId}/history`}
+                className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 hover:bg-slate-100 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-slate-500" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-slate-900 text-sm">
+                            Historial de pagos
+                        </p>
+                        <p className="text-xs text-slate-500">
+                            Ver todos los pagos liquidados
                         </p>
                     </div>
                 </div>
