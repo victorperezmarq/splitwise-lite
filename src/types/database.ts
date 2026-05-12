@@ -407,3 +407,22 @@ export type ExpenseWithSplits = Expense & {
         profiles: Profile // quien debe
     })[]
 }
+
+// Añadir a src/types/database.ts
+
+export type NotificationType =
+    | 'expense_added'
+    | 'debt_settled'
+    | 'group_joined'
+    | 'debt_reminder'
+
+export type Notification = {
+    id: string
+    user_id: string
+    type: NotificationType
+    title: string
+    body: string
+    group_id: string | null
+    is_read: boolean
+    created_at: string
+}
