@@ -1,4 +1,4 @@
-// src/components/Navbar.tsx — versión completa actualizada
+// src/components/Navbar.tsx
 'use client'
 
 import Link from 'next/link'
@@ -25,15 +25,15 @@ export default function Navbar({
     }
 
     return (
-        <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <nav className="sticky top-0 z-10 border-b" style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
 
                 {/* Logo */}
-                <Link href="/groups" className="flex items-center gap-2 font-semibold text-slate-900">
-                    <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <Home className="w-4 h-4 text-white" />
+                <Link href="/groups" className="flex items-center gap-2.5 font-semibold" style={{ color: 'var(--app-white)' }}>
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--app-accent2)' }}>
+                        S
                     </div>
-                    <span className="hidden sm:block">Splitwise Lite</span>
+                    <span className="hidden sm:block text-sm">Splitwise Lite</span>
                 </Link>
 
                 {/* Links de navegación */}
@@ -43,9 +43,13 @@ export default function Navbar({
                         className={cn(
                             'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors',
                             pathname.startsWith('/groups')
-                                ? 'bg-blue-50 text-blue-700 font-medium'
-                                : 'text-slate-600 hover:bg-slate-100'
+                                ? 'font-medium'
+                                : ''
                         )}
+                        style={pathname.startsWith('/groups')
+                            ? { background: 'rgba(99, 102, 241, .12)', color: 'var(--app-accent)' }
+                            : { color: 'var(--app-sub)' }
+                        }
                     >
                         <Users className="w-4 h-4" />
                         <span className="hidden sm:block">Mis grupos</span>
@@ -66,7 +70,8 @@ export default function Navbar({
                     {/* Perfil */}
                     <Link
                         href="/profile"
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors"
+                        style={{ color: 'var(--app-sub)' }}
                     >
                         {profile?.avatar_url ? (
                             <img
@@ -75,13 +80,13 @@ export default function Navbar({
                                 className="w-6 h-6 rounded-full object-cover"
                             />
                         ) : (
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--app-accent2)' }}>
                                 <span className="text-white text-xs font-medium">
                                     {profile?.full_name?.[0]?.toUpperCase() ?? '?'}
                                 </span>
                             </div>
                         )}
-                        <span className="text-sm text-slate-600 hidden sm:block">
+                        <span className="text-sm hidden sm:block">
                             {profile?.full_name}
                         </span>
                     </Link>
@@ -89,7 +94,8 @@ export default function Navbar({
                     {/* Logout */}
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-lg transition-colors"
+                        style={{ color: 'var(--app-sub)' }}
                         title="Cerrar sesión"
                     >
                         <LogOut className="w-4 h-4" />

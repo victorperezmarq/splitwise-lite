@@ -19,12 +19,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     // Base
                     'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
                     // Variantes
-                    {
-                        'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500': variant === 'primary',
-                        'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 focus-visible:ring-slate-400': variant === 'secondary',
-                        'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500': variant === 'danger',
-                        'text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400': variant === 'ghost',
-                    },
+                    variant === 'primary' && 'text-white',
+                    variant === 'secondary' && 'border',
+                    variant === 'danger' && 'text-white',
+                    variant === 'ghost' && 'hover:opacity-80',
                     // Tamaños
                     {
                         'text-sm px-3 py-1.5': size === 'sm',
@@ -33,6 +31,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     },
                     className
                 )}
+                style={{
+                    ...(variant === 'primary' ? { background: 'var(--app-accent2)', color: 'white' } : {}),
+                    ...(variant === 'secondary' ? { background: 'var(--app-surface2)', color: 'var(--app-text)', borderColor: 'var(--app-border)' } : {}),
+                    ...(variant === 'danger' ? { background: '#e11d48', color: 'white' } : {}),
+                    ...(variant === 'ghost' ? { color: 'var(--app-sub)', background: 'transparent' } : {}),
+                    ['--tw-ring-offset-color' as string]: 'var(--app-bg)',
+                    ['--tw-ring-color' as string]: variant === 'danger' ? '#f43f5e' : 'var(--app-accent)',
+                }}
                 {...props}
             >
                 {isLoading && (

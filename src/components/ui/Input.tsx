@@ -15,7 +15,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className="flex flex-col gap-1">
                 {label && (
-                    <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+                    <label htmlFor={inputId} className="text-sm font-medium" style={{ color: 'var(--app-text)' }}>
                         {label}
                     </label>
                 )}
@@ -24,20 +24,24 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     id={inputId}
                     className={cn(
                         'w-full px-3 py-2 text-sm rounded-lg border transition-colors duration-200',
-                        'placeholder:text-slate-400 bg-white',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                        'focus:outline-none focus:ring-2 focus:ring-offset-0',
                         error
-                            ? 'border-red-400 focus:ring-red-400'
-                            : 'border-slate-200 hover:border-slate-300',
+                            ? 'focus:ring-red-400'
+                            : '',
                         className
                     )}
+                    style={{
+                        background: 'var(--app-surface2)',
+                        color: 'var(--app-text)',
+                        borderColor: error ? 'rgba(251, 113, 133, .4)' : 'var(--app-border)',
+                    }}
                     {...props}
                 />
                 {hint && !error && (
-                    <p className="text-xs text-slate-400">{hint}</p>
+                    <p className="text-xs" style={{ color: 'var(--app-muted)' }}>{hint}</p>
                 )}
                 {error && (
-                    <p className="text-xs text-red-500 flex items-center gap-1">
+                    <p className="text-xs flex items-center gap-1" style={{ color: 'var(--app-red)' }}>
                         <span>⚠</span> {error}
                     </p>
                 )}

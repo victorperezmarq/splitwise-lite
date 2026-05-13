@@ -11,7 +11,7 @@ export function Card({ children, className, padding = 'md' }: CardProps) {
     return (
         <div
             className={cn(
-                'bg-white border border-slate-200 rounded-2xl',
+                'rounded-2xl border',
                 {
                     'p-4': padding === 'sm',
                     'p-6': padding === 'md',
@@ -19,6 +19,7 @@ export function Card({ children, className, padding = 'md' }: CardProps) {
                 },
                 className
             )}
+            style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}
         >
             {children}
         </div>
@@ -40,12 +41,12 @@ export function CardHeader({
         <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-2">
                 {icon && (
-                    <span className="text-slate-500">{icon}</span>
+                    <span style={{ color: 'var(--app-muted)' }}>{icon}</span>
                 )}
                 <div>
-                    <h2 className="font-semibold text-slate-900">{title}</h2>
+                    <h2 className="font-semibold" style={{ color: 'var(--app-white)' }}>{title}</h2>
                     {subtitle && (
-                        <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--app-muted)' }}>{subtitle}</p>
                     )}
                 </div>
             </div>

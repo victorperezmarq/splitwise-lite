@@ -29,10 +29,10 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="rounded-2xl border p-8" style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-900">Bienvenido de vuelta</h2>
-                <p className="text-sm text-slate-500 mt-1">Inicia sesión en tu cuenta</p>
+                <h2 className="text-xl font-semibold" style={{ color: 'var(--app-white)' }}>Bienvenido de vuelta</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--app-sub)' }}>Inicia sesión en tu cuenta</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -54,7 +54,7 @@ export default function LoginPage() {
                 />
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+                    <div className="text-sm px-4 py-3 rounded-lg" style={{ background: 'rgba(251, 113, 133, .1)', border: '1px solid rgba(251, 113, 133, .2)', color: 'var(--app-red)' }}>
                         {error}
                     </div>
                 )}
@@ -64,9 +64,9 @@ export default function LoginPage() {
                 </Button>
             </form>
 
-            <p className="text-center text-sm text-slate-500 mt-6">
+            <p className="text-center text-sm mt-6" style={{ color: 'var(--app-sub)' }}>
                 ¿No tienes cuenta?{' '}
-                <Link href="/register" className="text-blue-600 font-medium hover:underline">
+                <Link href="/register" className="font-medium hover:underline" style={{ color: 'var(--app-accent)' }}>
                     Regístrate gratis
                 </Link>
             </p>

@@ -16,11 +16,11 @@ const TYPE_ICON: Record<string, string> = {
     debt_reminder: '⏰',
 }
 
-const TYPE_COLOR: Record<string, string> = {
-    expense_added: 'bg-blue-50 border-blue-100',
-    debt_settled: 'bg-green-50 border-green-100',
-    group_joined: 'bg-purple-50 border-purple-100',
-    debt_reminder: 'bg-orange-50 border-orange-100',
+const TYPE_COLOR: Record<string, { bg: string; border: string }> = {
+    expense_added: { bg: 'rgba(99, 102, 241, .1)', border: 'rgba(99, 102, 241, .2)' },
+    debt_settled: { bg: 'rgba(52, 211, 153, .1)', border: 'rgba(52, 211, 153, .2)' },
+    group_joined: { bg: 'rgba(168, 85, 247, .1)', border: 'rgba(168, 85, 247, .2)' },
+    debt_reminder: { bg: 'rgba(251, 146, 60, .1)', border: 'rgba(251, 146, 60, .2)' },
 }
 
 export default function NotificationPanel({
@@ -77,7 +77,8 @@ export default function NotificationPanel({
             {/* Campana con badge */}
             <button
                 onClick={() => setIsOpen(prev => !prev)}
-                className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="relative p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--app-sub)' }}
                 aria-label="Notificaciones"
             >
                 <Bell className="w-5 h-5" />
@@ -90,16 +91,20 @@ export default function NotificationPanel({
 
             {/* Panel desplegable */}
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-lg z-50 overflow-hidden">
+                <div
+                    className="absolute right-0 top-full mt-2 w-80 border rounded-2xl shadow-lg z-50 overflow-hidden"
+                    style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}
+                >
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--app-border)' }}>
                         <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-slate-900 text-sm">
+                            <h3 className="font-semibold text-sm" style={{ color: 'var(--app-white)' }}>
                                 Notificaciones
                             </h3>
                             {unreadCount > 0 && (
-                                <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">
+                                <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                                    style={{ background: 'rgba(251, 113, 133, .15)', color: 'var(--app-red)' }}>
                                     {unreadCount} nuevas
                                 </span>
                             )}
@@ -108,7 +113,8 @@ export default function NotificationPanel({
                             {unreadCount > 0 && (
                                 <button
                                     onClick={handleMarkAllAsRead}
-                                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-1.5 rounded-lg transition-colors"
+                                    style={{ color: 'var(--app-muted)' }}
                                     title="Marcar todas como leídas"
                                 >
                                     <CheckCheck className="w-4 h-4" />
@@ -116,7 +122,8 @@ export default function NotificationPanel({
                             )}
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="p-1.5 rounded-lg transition-colors"
+                                style={{ color: 'var(--app-muted)' }}
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -127,8 +134,8 @@ export default function NotificationPanel({
                     <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
                             <div className="py-10 text-center">
-                                <Bell className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                                <p className="text-sm text-slate-400">Sin notificaciones</p>
+                                <Bell className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--app-border2)' }} />
+                                <p className="text-sm" style={{ color: 'var(--app-muted)' }}>Sin notificaciones</p>
                             </div>
                         ) : (
                             <div>
@@ -147,10 +154,11 @@ export default function NotificationPanel({
 
                     {/* Footer */}
                     {notifications.length > 0 && (
-                        <div className="border-t border-slate-100 px-4 py-2.5 text-center">
+                        <div className="border-t px-4 py-2.5 text-center" style={{ borderColor: 'var(--app-border)' }}>
                             <Link
                                 href="/notifications"
-                                className="text-xs text-blue-600 hover:underline font-medium"
+                                className="text-xs font-medium hover:underline"
+                                style={{ color: 'var(--app-accent)' }}
                                 onClick={() => setIsOpen(false)}
                             >
                                 Ver todas las notificaciones
@@ -177,27 +185,36 @@ function NotificationItem({
     onClose: () => void
 }) {
     const icon = TYPE_ICON[notification.type] ?? '🔔'
-    const colorClass = TYPE_COLOR[notification.type] ?? 'bg-slate-50 border-slate-100'
+    const colors = TYPE_COLOR[notification.type] ?? { bg: 'var(--app-surface2)', border: 'var(--app-border)' }
 
     const content = (
         <div
-            className={`flex items-start gap-3 px-4 py-3 border-b border-slate-50 transition-colors hover:bg-slate-50 ${!notification.is_read ? 'bg-blue-50/40' : ''
-                }`}
+            className="flex items-start gap-3 px-4 py-3 border-b transition-colors"
+            style={{
+                borderColor: 'var(--app-border)',
+                background: !notification.is_read ? 'rgba(99, 102, 241, .05)' : 'transparent',
+            }}
         >
             {/* Icono */}
-            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 text-base ${colorClass}`}>
+            <div
+                className="w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 text-base"
+                style={{ background: colors.bg, borderColor: colors.border }}
+            >
                 {icon}
             </div>
 
             {/* Texto */}
             <div className="flex-1 min-w-0">
-                <p className={`text-sm leading-snug ${notification.is_read ? 'text-slate-600' : 'text-slate-900 font-medium'}`}>
+                <p className="text-sm leading-snug" style={{
+                    color: notification.is_read ? 'var(--app-sub)' : 'var(--app-white)',
+                    fontWeight: notification.is_read ? 400 : 500,
+                }}>
                     {notification.title}
                 </p>
-                <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">
+                <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--app-muted)' }}>
                     {notification.body}
                 </p>
-                <p className="text-xs text-slate-300 mt-1">
+                <p className="text-xs mt-1" style={{ color: 'var(--app-border2)' }}>
                     {formatDate(notification.created_at)}
                 </p>
             </div>
@@ -210,7 +227,8 @@ function NotificationItem({
                             e.preventDefault()
                             onMarkAsRead(notification.id)
                         }}
-                        className="p-1 text-slate-300 hover:text-blue-500 transition-colors"
+                        className="p-1 transition-colors"
+                        style={{ color: 'var(--app-muted)' }}
                         title="Marcar como leída"
                     >
                         <Check className="w-3.5 h-3.5" />
@@ -221,7 +239,8 @@ function NotificationItem({
                         e.preventDefault()
                         onDelete(notification.id)
                     }}
-                    className="p-1 text-slate-300 hover:text-red-400 transition-colors"
+                    className="p-1 transition-colors"
+                    style={{ color: 'var(--app-muted)' }}
                     title="Eliminar"
                 >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -230,7 +249,7 @@ function NotificationItem({
 
             {/* Punto de no leída */}
             {!notification.is_read && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-1" />
+                <div className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ background: 'var(--app-accent)' }} />
             )}
         </div>
     )

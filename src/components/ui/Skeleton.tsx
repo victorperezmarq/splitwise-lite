@@ -5,9 +5,10 @@ export function Skeleton({ className }: { className?: string }) {
     return (
         <div
             className={cn(
-                'animate-pulse rounded-lg bg-slate-100',
+                'animate-pulse rounded-lg',
                 className
             )}
+            style={{ background: 'var(--app-border)' }}
         />
     )
 }
@@ -15,7 +16,7 @@ export function Skeleton({ className }: { className?: string }) {
 // Skeleton para la tarjeta de grupo
 export function GroupCardSkeleton() {
     return (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+        <div className="border rounded-xl p-5 space-y-3" style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <div className="flex justify-between">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-5 w-12" />
@@ -36,17 +37,17 @@ export function GroupCardSkeleton() {
 export function GroupDashboardSkeleton() {
     return (
         <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+            <div className="border rounded-2xl p-6 space-y-4" style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
                 <Skeleton className="h-8 w-48" />
                 <Skeleton className="h-4 w-64" />
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t" style={{ borderColor: 'var(--app-border)' }}>
                     <Skeleton className="h-16" />
                     <Skeleton className="h-16" />
                     <Skeleton className="h-16" />
                 </div>
             </div>
             <Skeleton className="h-14 rounded-xl" />
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-3">
+            <div className="border rounded-2xl p-6 space-y-3" style={{ background: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
                 <Skeleton className="h-5 w-32" />
                 {[1, 2, 3].map(i => (
                     <div key={i} className="flex items-center gap-4">

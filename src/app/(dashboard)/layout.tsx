@@ -29,7 +29,7 @@ export default async function DashboardLayout({
         .limit(20)
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen" style={{ background: 'var(--app-bg)' }}>
             <Navbar
                 profile={profile}
                 notifications={(notifications ?? []) as Notification[]}
