@@ -20,8 +20,12 @@ export default function Navbar({
     const pathname = usePathname()
 
     async function handleLogout() {
-        toast.loading('Cerrando sesión...')
-        await logout()
+        const id = toast.loading('Cerrando sesión...')
+        try {
+            await logout()
+        } finally {
+            toast.dismiss(id)
+        }
     }
 
     return (
